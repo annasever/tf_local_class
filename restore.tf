@@ -4,6 +4,10 @@ resource "null_resource" "db_restore" {
     docker_container.postgres
   ]
 
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
   provisioner "local-exec" {
     environment = {
       POSTGRES_DB       = var.POSTGRES_DB
@@ -11,6 +15,6 @@ resource "null_resource" "db_restore" {
       POSTGRES_PASSWORD = var.POSTGRES_PASSWORD
     }
 
-    command = "bash ${var.RESTORE_PATH} ${docker_container.postgres.name} ${var.DB_DUMP_PATH}"
+    command = "bash ${var.RESTORE_PATH} ${docker_container.postgres.name} ${var.CONTAINER_PATH}"
   }
 }

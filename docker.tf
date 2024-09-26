@@ -2,6 +2,7 @@ resource "docker_network" "app_network" {
   name = "app_network"
 }
 
+
 resource "docker_container" "backend" {
   image = docker_image.backend_image.name
   name  = "backend"
@@ -17,7 +18,6 @@ resource "docker_container" "backend" {
     "POSTGRES_HOST=${var.POSTGRES_HOST}",
     "REDIS_PORT=${var.REDIS_PORT}",
     "MONGO_INITDB_DATABASE=${var.MONGO_INITDB_DATABASE}",
-    "REACT_APP_API_BASE_URL=${var.REACT_APP_API_BASE_URL}",
     "DATABASE_URL=jdbc:postgresql://${var.POSTGRES_HOST}:${var.POSTGRES_PORT}/${var.POSTGRES_DB}"
   ]
   depends_on = [
@@ -41,11 +41,18 @@ resource "docker_container" "frontend" {
   depends_on = [
     docker_container.backend
   ]
-
+  env = [
+    "REACT_APP_API_BASE_URL=${var.REACT_APP_API_BASE_URL}",
+  ]
   networks_advanced {
     name = docker_network.app_network.name
   }
 }
+
+resource "docker_volume" "postgres_data" {
+  name = "postgres_data"
+}
+
 resource "docker_container" "postgres" {
   image = docker_image.postgres_image.name
   name  = "postgres"
@@ -63,6 +70,11 @@ resource "docker_container" "postgres" {
   volumes {
     host_path      = var.DB_DUMP_PATH
     container_path = var.CONTAINER_PATH
+  }
+
+  volumes {
+    host_path      = abspath(docker_volume.postgres_data.name)
+    container_path = "/var/lib/postgresql/data"
   }
 
   networks_advanced {
@@ -102,3 +114,4 @@ resource "docker_container" "redis" {
     name = docker_network.app_network.name
   }
 }
+

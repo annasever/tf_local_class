@@ -1,5 +1,5 @@
 POSTGRES_DB       = "database"
-POSTGRES_USER     = "user"
+POSTGRES_USER     = "postgres"
 POSTGRES_PASSWORD = "password"
 POSTGRES_PORT     = 5432
 POSTGRES_HOST     = "postgres"
